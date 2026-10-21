@@ -49,7 +49,7 @@ canvas {
   max-height: 88vh;
   aspect-ratio: 1000 / 560;
   object-fit: contain;
-  background: #0b0d10; /* Темная бездна вокруг платформы */
+  background: #0b0d10;
   border-radius: 10px;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.85);
   border: 2px solid #1a1e26;
@@ -97,6 +97,20 @@ input {
 }
 input:focus { outline: none; border-color: #f1c40f; }
 
+/* СТИЛИЗАЦИЯ ВЫБОРА ЦВЕТА МАШИНКИ */
+input[type="color"] {
+  width: 52px;
+  height: 42px;
+  padding: 3px;
+  background: #232832;
+  border: 1px solid #384252;
+  border-radius: 8px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
+input[type="color"]::-webkit-color-swatch { border: none; border-radius: 5px; }
+
 button {
   border: none;
   font-weight: bold;
@@ -110,7 +124,7 @@ button {
   width: 100%;
   align-items: center;
 }
-.form-row input { flex: 1; }
+.form-row input[type="text"], .form-row input[type="number"] { flex: 1; }
 
 .btn-primary { background: #27ae60; color: #fff; width: 100%; }
 .btn-primary:hover { background: #2ecc71; }
@@ -169,7 +183,17 @@ button {
 .stats-title { font-size: 11px; font-weight: bold; color: #f1c40f; margin-bottom: 6px; text-align: center; }
 #players-table { width: 100%; border-collapse: collapse; font-size: 12px; }
 #players-table th { color: #8896ab; font-size: 10px; padding-bottom: 4px; text-align: left; }
-#players-table td { padding: 4px 0; color: #fff; }
+#players-table td { padding: 4px 0; color: #fff; vertical-align: middle; }
+
+/* Кружок цвета игрока в таблице */
+.player-color-dot {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  margin-right: 5px;
+  border: 1px solid rgba(255,255,255,0.4);
+}
 
 #hud-item-slot {
   background: #161920;
@@ -187,7 +211,6 @@ button {
 
 .badge { background: #161920; padding: 6px 12px; border-radius: 6px; border: 1px solid #28303b; color: #f1c40f; }
 .badge-timer { color: #e74c3c; border-color: #c0392b; }
-
 
 .modal-overlay {
   position: absolute; z-index: 80;

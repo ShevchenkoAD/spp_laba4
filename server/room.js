@@ -10,7 +10,6 @@ export function getPlatformBounds(x) {
   let indent = 0;
   const d = Math.abs(x - 500); 
   if (d < 340) {
-    
     indent = 130 * 0.5 * (1 + Math.cos((d / 340) * Math.PI));
   }
   return {
@@ -110,7 +109,7 @@ export class Room {
     ];
   }
 
-  addPlayer(id, name, token, ws) {
+  addPlayer(id, name, color, token, ws) {
     if (this.players.size >= 4) return null;
     const spawns = this.getSpawns();
     const spawn = spawns[this.players.size % 4];
@@ -118,6 +117,7 @@ export class Room {
     const player = {
       id,
       name,
+      color: color || '#e74c3c', 
       token,
       ws,
       x: spawn.x,
@@ -383,7 +383,6 @@ export class Room {
           }
         }
 
-        
         if (trap.type === 'turbine') {
           const dx = p.x - trap.x, dy = p.y - trap.y;
           const cos = Math.cos(trap.angle), sin = Math.sin(trap.angle);
@@ -415,7 +414,6 @@ export class Room {
       }
 
       
-      
       const baseAccel = 0.16 * accelMultiplier;
       if (p.inputs.w) {
         p.speedX += Math.cos(p.angle) * baseAccel;
@@ -434,7 +432,6 @@ export class Room {
       p.speedX = (forwardX * forwardSpeed + rightX * (lateralSpeed * (1 - currentGrip))) * currentFriction;
       p.speedY = (forwardY * forwardSpeed + rightY * (lateralSpeed * (1 - currentGrip))) * currentFriction;
 
-      
       const currentSpeed = Math.hypot(p.speedX, p.speedY);
       const maxAllowed = (p.boostCooldown && p.boostCooldown > 8) ? 9.0 : 5.6;
       if (currentSpeed > maxAllowed) {
@@ -525,6 +522,7 @@ export class Room {
       .sort((a, b) => b.score - a.score)
       .map(pl => ({
         name: pl.name,
+        color: pl.color,
         finished: pl.finished,
         eliminated: pl.eliminated,
         earned: pl.roundEarned,
@@ -592,7 +590,7 @@ export class Room {
       type: 'GAME_OVER',
       winner: best?.name,
       roundResults: this.roundResults,
-      finalScores: sorted.map((p, i) => ({ place: i + 1, name: p.name, score: p.score }))
+      finalScores: sorted.map((p, i) => ({ place: i + 1, name: p.name, color: p.color, score: p.score }))
     });
   }
 
@@ -621,6 +619,7 @@ export class Room {
       players: Array.from(this.players.values()).map(p => ({
         id: p.id,
         name: p.name,
+        color: p.color,
         x: Math.round(p.x),
         y: Math.round(p.y),
         angle: p.angle,

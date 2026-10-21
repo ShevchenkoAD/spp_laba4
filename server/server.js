@@ -45,7 +45,6 @@ wss.on('connection', (ws) => {
     try {
       const data = JSON.parse(message);
 
-
       if (data.type === 'CREATE_ROOM') {
         const code = Math.random().toString(36).substring(2, 6).toUpperCase();
         const rounds = Math.max(1, Math.min(20, parseInt(data.rounds, 10) || 5));
@@ -54,7 +53,7 @@ wss.on('connection', (ws) => {
 
         const playerId = crypto.randomUUID();
         const token = crypto.randomUUID();
-        room.addPlayer(playerId, data.name || 'Хост', token, ws);
+        room.addPlayer(playerId, data.name || 'Хост', data.color, token, ws);
 
         boundPlayerId = playerId;
         boundRoomCode = code;
@@ -62,7 +61,6 @@ wss.on('connection', (ws) => {
         ws.send(JSON.stringify({ type: 'ROOM_JOINED', code, playerId, token, isDebug: false }));
       }
 
-      
       if (data.type === 'JOIN_DEBUG_ROOM') {
         let room = rooms.get('DEBUG');
         if (!room) {
@@ -72,7 +70,7 @@ wss.on('connection', (ws) => {
 
         const playerId = crypto.randomUUID();
         const token = crypto.randomUUID();
-        const player = room.addPlayer(playerId, data.name || 'Тестер', token, ws);
+        const player = room.addPlayer(playerId, data.name || 'Тестер', data.color, token, ws);
 
         if (!player) return ws.send(JSON.stringify({ type: 'ERROR', message: 'Дебаг комната переполнена' }));
 
@@ -82,7 +80,6 @@ wss.on('connection', (ws) => {
         ws.send(JSON.stringify({ type: 'ROOM_JOINED', code: 'DEBUG', playerId, token, isDebug: true }));
       }
 
-      
       if (data.type === 'GIVE_ITEM') {
         const room = rooms.get(boundRoomCode);
         if (room) {
@@ -96,7 +93,7 @@ wss.on('connection', (ws) => {
 
         const playerId = crypto.randomUUID();
         const token = crypto.randomUUID();
-        const player = room.addPlayer(playerId, data.name || 'Гонщик', token, ws);
+        const player = room.addPlayer(playerId, data.name || 'Гонщик', data.color, token, ws);
 
         if (!player) return ws.send(JSON.stringify({ type: 'ERROR', message: 'Комната заполнена (макс. 4)' }));
 
@@ -105,7 +102,6 @@ wss.on('connection', (ws) => {
 
         ws.send(JSON.stringify({ type: 'ROOM_JOINED', code: data.code, playerId, token, isDebug: room.isDebug }));
       }
-
 
       if (data.type === 'RECONNECT') {
         const room = rooms.get(data.code);

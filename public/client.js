@@ -40,7 +40,6 @@ const ITEM_NAMES = {
   bomb: 'БОМБА'
 };
 
-
 function getPlatformBounds(x) {
   if (x < 20 || x > 980) return null;
   let indent = 0;
@@ -53,7 +52,6 @@ function getPlatformBounds(x) {
     bottom: 540 - indent
   };
 }
-
 
 const MAP_HOLES = [
   { x: 330, y: 170, r: 35 },
@@ -242,7 +240,10 @@ function connectSocket(onOpenCallback) {
 
         return `
           <tr style="color: ${p.id === myId ? '#f1c40f' : '#fff'}; font-weight: ${p.id === myId ? 'bold' : 'normal'}">
-            <td>${p.name}</td>
+            <td>
+              <span class="player-color-dot" style="background: ${p.color};"></span>
+              ${p.name}
+            </td>
             <td style="color: ${status === 'УПАЛ' ? '#e74c3c' : (status === 'ФИНИШ' ? '#2ecc71' : '#fff')}">${status}</td>
             <td>${p.score}</td>
           </tr>
@@ -304,7 +305,10 @@ function connectSocket(onOpenCallback) {
       if (data.roundResults) {
         modalTableBody.innerHTML = data.roundResults.map(r => `
           <tr>
-            <td>${r.name}</td>
+            <td>
+              <span class="player-color-dot" style="background: ${r.color};"></span>
+              ${r.name}
+            </td>
             <td style="color: ${r.finished ? '#2ecc71' : '#e74c3c'}">${r.finished ? 'ДОЕХАЛ' : 'УПАЛ'}</td>
             <td style="color: ${r.earned > 0 ? '#2ecc71' : (r.earned < 0 ? '#e74c3c' : '#888')};">
               ${r.earned > 0 ? '+' + r.earned : r.earned}
@@ -327,7 +331,10 @@ function connectSocket(onOpenCallback) {
         modalTableBody.innerHTML = data.finalScores.map(r => `
           <tr style="font-weight: ${r.place === 1 ? 'bold' : 'normal'}; color: ${r.place === 1 ? '#f1c40f' : '#fff'}">
             <td>${r.place}</td>
-            <td>${r.name}</td>
+            <td>
+              <span class="player-color-dot" style="background: ${r.color};"></span>
+              ${r.name}
+            </td>
             <td>${r.score}</td>
           </tr>
         `).join('');
@@ -360,20 +367,23 @@ fetch('/api/records').then(r => r.json()).then(data => {
 
 document.getElementById('btn-create').onclick = () => {
   const name = document.getElementById('player-name').value;
+  const color = document.getElementById('player-color').value;
   const rounds = document.getElementById('room-rounds').value;
-  connectSocket(() => ws.send(JSON.stringify({ type: 'CREATE_ROOM', name, rounds })));
+  connectSocket(() => ws.send(JSON.stringify({ type: 'CREATE_ROOM', name, color, rounds })));
 };
 
 document.getElementById('btn-debug').onclick = () => {
   const name = document.getElementById('player-name').value;
-  connectSocket(() => ws.send(JSON.stringify({ type: 'JOIN_DEBUG_ROOM', name })));
+  const color = document.getElementById('player-color').value;
+  connectSocket(() => ws.send(JSON.stringify({ type: 'JOIN_DEBUG_ROOM', name, color })));
 };
 
 document.getElementById('btn-join').onclick = () => {
   const name = document.getElementById('player-name').value;
+  const color = document.getElementById('player-color').value;
   const code = document.getElementById('room-code-input').value.toUpperCase().trim();
   if (!code) return showAlert('Введите код комнаты!');
-  connectSocket(() => ws.send(JSON.stringify({ type: 'JOIN_ROOM', code, name })));
+  connectSocket(() => ws.send(JSON.stringify({ type: 'JOIN_ROOM', code, name, color })));
 };
 
 
@@ -395,7 +405,6 @@ function render() {
     
     function traceHourglass(targetCtx) {
       targetCtx.beginPath();
-      
       targetCtx.moveTo(20, 20);
       targetCtx.lineTo(160, 20);
       for (let x = 160; x <= 840; x += 10) {
@@ -413,12 +422,11 @@ function render() {
       targetCtx.closePath();
     }
 
-    
     ctx.save();
     traceHourglass(ctx);
     ctx.fillStyle = '#1e222b';
     ctx.fill();
-    ctx.clip(); 
+    ctx.clip();
 
     
     ctx.fillStyle = '#182b20';
@@ -441,7 +449,6 @@ function render() {
     }
     ctx.restore();
 
-    
     ctx.strokeStyle = 'rgba(231, 76, 60, 0.45)';
     ctx.lineWidth = 2.5;
     traceHourglass(ctx);
@@ -510,8 +517,7 @@ function render() {
       ctx.fillStyle = 'rgba(255, 255, 255, 0.16)';
       ctx.beginPath();
       ctx.moveTo(0, 0); ctx.lineTo(130, -26); ctx.lineTo(130, 26);
-      ctx.closePath();
-      ctx.fill();
+      ctx.closePath(); ctx.fill();
       ctx.fillStyle = '#0284c7';
       ctx.beginPath(); ctx.arc(0, 0, 11, 0, Math.PI * 2); ctx.fill();
       ctx.fillStyle = '#38bdf8';
@@ -612,20 +618,29 @@ function render() {
 
     ctx.globalAlpha = (p.disconnected || p.finished) ? 0.4 : 1.0;
 
-    ctx.fillStyle = (p.id === myId) ? '#e74c3c' : '#2980b9';
+    
+    ctx.fillStyle = p.color || ((p.id === myId) ? '#e74c3c' : '#2980b9');
     ctx.beginPath();
     ctx.roundRect(-8, -4, 16, 8, 4);
     ctx.fill();
 
+    
+    ctx.strokeStyle = (p.id === myId) ? '#f1c40f' : 'rgba(255, 255, 255, 0.45)';
+    ctx.lineWidth = (p.id === myId) ? 1.5 : 1;
+    ctx.stroke();
+
+    
     ctx.fillStyle = '#000';
     ctx.fillRect(-6, -5, 4, 1.5);
     ctx.fillRect(2, -5, 4, 1.5);
     ctx.fillRect(-6, 3.5, 4, 1.5);
     ctx.fillRect(2, 3.5, 4, 1.5);
 
+    
     ctx.fillStyle = '#ecf0f1';
     ctx.fillRect(0, -2.5, 3, 5);
 
+    
     ctx.fillStyle = '#f1c40f';
     ctx.fillRect(7, -3, 1.5, 1.5);
     ctx.fillRect(7, 1.5, 1.5, 1.5);
