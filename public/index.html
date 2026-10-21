@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>2D Гонки</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+
+  <div id="lobby-screen" class="overlay">
+    <div class="card">
+      <h1>2D Micro Racers</h1>
+      <input type="text" id="player-name" placeholder="Ваш никнейм" maxlength="12" value="Гонщик 1">
+      <div class="form-row">
+        <input type="number" id="room-rounds" min="1" max="20" value="5" placeholder="Раундов (1-20)">
+      </div>
+      <div class="form-row">
+        <button id="btn-create" class="btn-primary">Создать комнату</button>
+      </div>
+      <div class="form-row">
+        <button id="btn-debug" class="btn-debug">ДЕБАГ КОМНАТА</button>
+      </div>
+      <div class="divider">или</div>
+      <div class="form-row">
+        <input type="text" id="room-code-input" placeholder="КОД КОМНАТЫ" style="text-transform: uppercase;">
+        <button id="btn-join" class="btn-secondary">Войти</button>
+      </div>
+      <div id="lobby-status" class="status-text"></div>
+
+      <div class="records-block">
+        <h3>Зал славы</h3>
+        <ul id="records-list"></ul>
+      </div>
+    </div>
+  </div>
+
+  <div id="game-ui" style="display: none;">
+    <div id="game-layout">
+      
+      <div id="hud-left-panel">
+        <div class="stats-card">
+          <div class="stats-title">ТАБЛИЦА ГОНКИ</div>
+          <table id="players-table">
+            <thead>
+              <tr><th>ИГРОК</th><th>СТАТУС</th><th>ОЧКИ</th></tr>
+            </thead>
+            <tbody id="players-table-body"></tbody>
+          </table>
+        </div>
+
+        <div id="hud-item-slot">
+          <div class="slot-title">ПРЕДМЕТ:</div>
+          <div id="item-icon" class="slot-box">НЕТ</div>
+        </div>
+      </div>
+
+      <div id="canvas-area">
+        <div id="hud-top-bar">
+          <div>Комната: <span id="hud-room" class="badge">----</span></div>
+          <div>Раунд: <span id="hud-round" class="badge">1/5</span></div>
+          <div id="hud-round-timer" class="badge">Время: 60с</div>
+          <div id="hud-phase-timer" class="badge badge-timer" style="display: none;">Стройка: 30с</div>
+          <button id="btn-start-game" class="btn-start">СТАРТ</button>
+          <button id="btn-vote-ready" class="btn-ready" style="display: none;">ГОТОВ (0/0)</button>
+        </div>
+
+        <canvas id="gameCanvas" width="1000" height="560"></canvas>
+      </div>
+
+    </div>
+
+    <div id="lap-modal" class="modal-overlay" style="display: none;">
+      <div class="modal-card">
+        <h2 id="modal-lap-title">ИТОГИ РАУНДА</h2>
+        <div id="modal-lap-timer" class="modal-timer">30с</div>
+        <table class="modal-table">
+          <thead>
+            <tr id="modal-table-headers">
+              <th>ИГРОК</th><th>ФИНИШ</th><th>ЗА РАУНД</th><th>ВСЕГО</th>
+            </tr>
+          </thead>
+          <tbody id="modal-table-body"></tbody>
+        </table>
+        <button id="btn-modal-action" class="btn-primary" style="margin-top: 15px; width: 100%;">ПЕРЕЙТИ К СТРОЙКЕ</button>
+      </div>
+    </div>
+
+    <div id="debug-toolbar" style="display: none;">
+      <span class="toolbar-label">ВЗЯТЬ:</span>
+      <button class="dbg-btn" data-item="bumper">Бампер</button>
+      <button class="dbg-btn" data-item="thin_wall">Стена</button>
+      <button class="dbg-btn" data-item="turbine">Турбина</button>
+      <button class="dbg-btn" data-item="ice">Лед</button>
+      <button class="dbg-btn" data-item="oil">Масло</button>
+      <button class="dbg-btn" data-item="boost">Турбо</button>
+      <button class="dbg-btn" data-item="bomb">Бомба</button>
+    </div>
+
+    <div id="alert-banner"></div>
+  </div>
+
+  <script src="client.js"></script>
+</body>
+</html>
