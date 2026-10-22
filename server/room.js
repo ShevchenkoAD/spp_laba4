@@ -182,17 +182,37 @@ export class Room {
 
     if (!this.isDebug) {
       if (isOffPlatform(targetX, targetY) || targetX < 160 || targetX > 840) {
-        player.ws.send(JSON.stringify({ type: 'CONFLICT_REJECTED', reason: 'Ставьте предмет на полотне песочных часов!' }));
+        player.ws.send(JSON.stringify({ 
+          type: 'CONFLICT_REJECTED', 
+          reason: 'Ставьте предмет на полотне песочных часов!' 
+        }));
         return;
       }
+
       for (const h of MAP_HOLES) {
         if (Math.hypot(targetX - h.x, targetY - h.y) < h.r) {
-          player.ws.send(JSON.stringify({ type: 'CONFLICT_REJECTED', reason: 'Нельзя ставить предмет в яму!' }));
+          player.ws.send(JSON.stringify({ 
+            type: 'CONFLICT_REJECTED', 
+            reason: 'Нельзя ставить предмет в яму!' 
+          }));
           return;
         }
       }
+    
     }
 
+    const MIN_TRAP_DISTANCE = 30; 
+    for (const existingTrap of this.traps.values()) {
+      if (Math.hypot(targetX - existingTrap.x, targetY - existingTrap.y) < MIN_TRAP_DISTANCE) {
+        
+        player.ws.send(JSON.stringify({ 
+          type: 'CONFLICT_REJECTED', 
+          reason: ' уже занята другим участником!' 
+        }));
+        return; 
+      }
+    }
+    
     const trapId = `trap_${Date.now()}_${Math.random()}`;
     const trap = {
       id: trapId,
@@ -204,7 +224,7 @@ export class Room {
     };
 
     this.traps.set(trapId, trap);
-    if (!this.isDebug) player.item = null;
+    if (!this.isDebug) player.item = null; 
 
     this.broadcast({ type: 'TRAP_PLACED', trap });
   }
@@ -584,13 +604,28 @@ export class Room {
     this.state = 'FINISHED';
     const sorted = Array.from(this.players.values()).sort((a, b) => b.score - a.score);
     const best = sorted[0];
-    if (best) Storage.saveRaceResult(best.name, best.score);
+
+    const playersData = sorted.map((p, i) => ({
+      place: i + 1,
+      name: p.name,
+      color: p.color,
+      score: p.score
+    }));
+    const trapsData = Array.from(this.traps.values());
+
+    Storage.saveMatch({
+      winner: best?.name,
+      rounds: this.maxRounds,
+      players: playersData,
+      traps: trapsData
+    });
 
     this.broadcast({
       type: 'GAME_OVER',
       winner: best?.name,
       roundResults: this.roundResults,
-      finalScores: sorted.map((p, i) => ({ place: i + 1, name: p.name, color: p.color, score: p.score }))
+      finalScores: playersData,
+      traps: trapsData
     });
   }
 
